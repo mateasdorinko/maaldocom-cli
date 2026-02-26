@@ -1,0 +1,107 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DOTNET_VERSION: '10.0.x'
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run tests
+        run: dotnet test --no-build --configuration Release --logger:"junit;LogFilePath=${{ github.workspace }}/results/{assembly}-test-results.xml" --collect:"XPlat Code Coverage"
+
+      - name: Create test summary
+        uses: test-summary/action@v2.4
+        with:
+          paths: ${{ github.workspace }}/results/*.xml
+          output: ${{ github.workspace }}/results/summary.md
+          show: "all"
+        if: always()
+
+      - name: Generate coverage report
+        uses: danielpalme/ReportGenerator-GitHub-Action@ee0ae774f6d3afedcbd1683c1ab21b83670bdf8e # v5
+        with:
+          reports: '**/coverage.cobertura.xml'
+          targetdir: ${{ github.workspace }}/results/coverage
+          reporttypes: 'MarkdownSummaryGithub;Badges'
+        if: always()
+
+      - name: Add test results to job summary
+        run: |
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat "${{ github.workspace }}/results/summary.md" >> $GITHUB_STEP_SUMMARY
+        if: always()
+
+      - name: Add coverage results to job summary
+        run: |
+          echo "## Code Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat "${{ github.workspace }}/results/coverage/SummaryGithub.md" >> $GITHUB_STEP_SUMMARY
+        if: always()
+
+      - name: Publish coverage badges
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          cp -r ${{ github.workspace }}/results/coverage /tmp/coverage-badges
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git stash --include-untracked
+          if git fetch origin badges:badges 2>/dev/null; then
+            git checkout badges
+          else
+            git checkout --orphan badges
+            git rm -rf . 2>/dev/null || true
+          fi
+          rm -rf badges
+          mkdir -p badges
+          cp /tmp/coverage-badges/badge_*.svg badges/
+          git add badges/
+          git diff --cached --quiet && exit 0
+          git commit -m "Update coverage badges"
+          git push origin badges

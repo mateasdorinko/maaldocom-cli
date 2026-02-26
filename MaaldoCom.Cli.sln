@@ -28,10 +28,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{901366
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub Actions", "GitHub Actions", "{578CE490-2A80-46F3-AF40-06876A27176D}"
+	ProjectSection(SolutionItems) = preProject
+		.github\dependabot.yml = .github\dependabot.yml
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaldoCom.Cli.Domain", "src\MaaldoCom.Cli.Domain\MaaldoCom.Cli.Domain.csproj", "{232810A5-9EBF-480F-B5B1-A3C0DC84523A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Unit.Infrastructure", "tests\Tests.Unit.Infrastructure\Tests.Unit.Infrastructure.csproj", "{13762CD4-9C29-496D-BF84-9DF915CF203B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "actions", "actions", "{7B1DD9CB-2CF8-44B2-AED7-7F075D32938F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{A37D58F2-3F48-44FC-9580-8FDFED424EBA}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci-cd.yml = .github\workflows\ci-cd.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +57,8 @@ Global
 		{578CE490-2A80-46F3-AF40-06876A27176D} = {37001AD1-63C9-4BFD-918A-2D9983AF2894}
 		{232810A5-9EBF-480F-B5B1-A3C0DC84523A} = {2C428F2C-143E-48CE-AC16-ACE20BFF326F}
 		{13762CD4-9C29-496D-BF84-9DF915CF203B} = {BFDA89C8-B60E-411B-8E8F-1B4F7AB4664B}
+		{7B1DD9CB-2CF8-44B2-AED7-7F075D32938F} = {578CE490-2A80-46F3-AF40-06876A27176D}
+		{A37D58F2-3F48-44FC-9580-8FDFED424EBA} = {578CE490-2A80-46F3-AF40-06876A27176D}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{BB17D358-BDA7-4A01-8696-5C5C0FDCE8BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
