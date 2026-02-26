@@ -1,6 +1,10 @@
 <img src="/assets/logo.svg" width="100" />
 
-# MaaldoCom.Cli
+# MaaldoCom Cli
+
+[![CI/CD Pipeline](https://github.com/mateasdorinko/maaldocom-cli/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/mateasdorinko/maaldocom-cli/actions/workflows/ci-cd.yml)
+
+![Code Coverage](https://raw.githubusercontent.com/mateasdorinko/maaldocom-cli/badges/badges/badge_linecoverage.svg)
 
 A .NET 10 CLI tool for interacting with the maaldo.com API and managing media album assets locally.
 
