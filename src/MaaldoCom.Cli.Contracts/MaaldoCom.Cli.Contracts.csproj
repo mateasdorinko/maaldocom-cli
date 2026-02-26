@@ -1,0 +1,5 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\MaaldoCom.Cli.Domain\MaaldoCom.Cli.Domain.csproj" />
+  </ItemGroup>
+</Project>

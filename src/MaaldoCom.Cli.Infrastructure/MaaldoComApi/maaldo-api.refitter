@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/christianhelle/refitter/main/src/Refitter/refitter.schema.json",
+  "openApiPath": "https://api.maaldo.com/swagger/v1/swagger.json",
+  "namespace": "MaaldoCom.Cli.Infrastructure.MaaldoComApi",
+  "naming": {
+    "useOpenApiTitle": false,
+    "interfaceName": "MaaldoApiClient"
+  },
+  "generateContracts": true,
+  "codeGeneratorSettings": {
+    "jsonLibrary": "SystemTextJson"
+  },
+  "outputFilename": "MaaldoApiClient.cs"
+}

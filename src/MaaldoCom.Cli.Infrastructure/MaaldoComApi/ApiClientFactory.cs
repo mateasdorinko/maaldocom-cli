@@ -1,0 +1,59 @@
+using System.Text.Json;
+using Microsoft.Extensions.Configuration;
+using Refit;
+
+namespace MaaldoCom.Cli.Infrastructure.MaaldoComApi;
+
+public sealed class ApiClientFactory(IConfiguration configuration) : IApiClientFactory
+{
+    private readonly RefitSettings _refitSettings = new()
+    {
+        ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        })
+    };
+
+    private static HttpMessageHandler CreateInnerHandler(ApiEnvironment environment)
+    {
+        if (environment != ApiEnvironment.Local) return new HttpClientHandler();
+
+#pragma warning disable S4830 // Server certificates should be verified during SSL/TLS connections
+        return new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        };
+#pragma warning restore S4830
+    }
+
+    private static HttpClient CreateHttpClient(ApiEnvironment environment, string baseUrl)
+    {
+        var innerHandler = CreateInnerHandler(environment);
+        var timingHandler = new TimingHandler(innerHandler);
+
+        return new HttpClient(timingHandler) { BaseAddress = new Uri(baseUrl) };
+    }
+
+    public IMaaldoApiClient CreateClient(ApiEnvironment environment)
+    {
+        var configKey = $"apiEnvironments:{environment.ToConfigKey()}:maaldoApiBaseUrl";
+        var baseUrl = configuration[configKey];
+
+        if (string.IsNullOrEmpty(baseUrl))
+        {
+            throw new InvalidOperationException($"Base URL not configured for environment: {environment}");
+        }
+
+        var httpClient = CreateHttpClient(environment, baseUrl);
+        return RestService.For<IMaaldoApiClient>(httpClient, _refitSettings);
+    }
+
+    public IKnowledgeService GetKnowledgeService() => new KnowledgeService(_apiClient);
+
+    public IMediaAlbumService GetMediaAlbumService() => new MediaAlbumService(_apiClient);
+
+    public ISystemService GetSystemService() => new SystemService(_apiClient);
+
+    public ITagService GetTagService() => new TagService(_apiClient);
+}
